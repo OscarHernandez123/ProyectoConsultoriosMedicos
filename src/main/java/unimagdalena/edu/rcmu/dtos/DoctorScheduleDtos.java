@@ -9,8 +9,7 @@ public class DoctorScheduleDtos {
     public record DoctorScheduleCreateRequest(
         @NotNull DayOfWeek dayOfWeek,
         @NotNull LocalTime startAt,
-        @NotNull LocalTime endAt,
-        UUID doctorId
+        @NotNull LocalTime endAt
     ){}
 
     public record DoctorScheduleResponse(

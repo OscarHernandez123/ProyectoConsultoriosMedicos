@@ -1,14 +1,16 @@
 package unimagdalena.edu.rcmu.services.servicesImpls;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import unimagdalena.edu.rcmu.dtos.PatientDtos.PatientCreateRequest;
+import unimagdalena.edu.rcmu.dtos.PatientDtos.PatientPatchRequest;
 import unimagdalena.edu.rcmu.dtos.PatientDtos.PatientResponse;
 import unimagdalena.edu.rcmu.dtos.PatientDtos.PatientUpdateRequest;
 import unimagdalena.edu.rcmu.entities.Patient;
@@ -42,12 +44,26 @@ public class PatientServiceImpl implements PatientService{
     }
 
     @Override
-    public PatientResponse patch(PatientUpdateRequest request, UUID patientId) {
+    public PatientResponse patch(PatientPatchRequest request, UUID patientId) {
 
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new NotFoundException("Patient not found"));
 
         PatientMapper.patch(patient, request);
+
+        patient.setUpdatedAt(Instant.now());
+        Patient savedPatient = patientRepository.save(patient);
+
+        return PatientMapper.toResponse(savedPatient);
+    }
+
+    @Override
+    public PatientResponse update(PatientUpdateRequest request, UUID patientId) {
+
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new NotFoundException("Patient not found"));
+
+        PatientMapper.update(patient, request);
 
         patient.setUpdatedAt(Instant.now());
         Patient savedPatient = patientRepository.save(patient);
@@ -65,12 +81,8 @@ public class PatientServiceImpl implements PatientService{
     }
 
     @Override
-    public List<PatientResponse> listAll() {
-
-        return patientRepository.findAll()
-                .stream()
-                .map(PatientMapper::toResponse)
-                .toList();
+    public Page<PatientResponse> list(Pageable pageable) {
+        return patientRepository.findAll(pageable).map(PatientMapper::toResponse);
     }
 
 }

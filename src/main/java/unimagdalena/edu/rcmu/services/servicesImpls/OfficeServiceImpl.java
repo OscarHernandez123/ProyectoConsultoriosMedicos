@@ -1,14 +1,16 @@
 package unimagdalena.edu.rcmu.services.servicesImpls;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import unimagdalena.edu.rcmu.dtos.OfficeDtos.OfficeCreateRequest;
+import unimagdalena.edu.rcmu.dtos.OfficeDtos.OfficePatchRequest;
 import unimagdalena.edu.rcmu.dtos.OfficeDtos.OfficeResponse;
 import unimagdalena.edu.rcmu.dtos.OfficeDtos.OfficeUpdateRequest;
 import unimagdalena.edu.rcmu.entities.Office;
@@ -40,12 +42,26 @@ public class OfficeServiceImpl implements OfficeService {
     }
 
     @Override
-    public OfficeResponse patch(OfficeUpdateRequest request, UUID officeId) {
+    public OfficeResponse patch(OfficePatchRequest request, UUID officeId) {
 
         Office office = officeRepository.findById(officeId)
                 .orElseThrow(() -> new NotFoundException("Office not found"));
 
         OfficeMapper.patch(office, request);
+
+        office.setUpdatedAt(Instant.now());
+        Office savedOffice = officeRepository.save(office);
+
+        return OfficeMapper.toResponse(savedOffice);
+    }
+
+    @Override
+    public OfficeResponse update(OfficeUpdateRequest request, UUID officeId) {
+
+        Office office = officeRepository.findById(officeId)
+                .orElseThrow(() -> new NotFoundException("Office not found"));
+
+        OfficeMapper.update(office, request);
 
         office.setUpdatedAt(Instant.now());
         Office savedOffice = officeRepository.save(office);
@@ -63,11 +79,7 @@ public class OfficeServiceImpl implements OfficeService {
     }
 
     @Override
-    public List<OfficeResponse> listAll() {
-
-        return officeRepository.findAll()
-                .stream()
-                .map(OfficeMapper::toResponse)
-                .toList();
+    public Page<OfficeResponse> list(Pageable pageable) {
+        return officeRepository.findAll(pageable).map(OfficeMapper::toResponse);
     }
 }

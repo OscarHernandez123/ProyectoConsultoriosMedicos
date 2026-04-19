@@ -8,11 +8,14 @@ import unimagdalena.edu.rcmu.entities.DoctorSchedule;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 
 public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, UUID>{
 
+    List<DoctorSchedule> findByDoctorId(UUID doctorId);
+    
     Optional<DoctorSchedule> findByDoctorIdAndDayOfWeek(UUID doctorId, DayOfWeek dayOfWeek);
 
     boolean existsByDoctorIdAndDayOfWeekAndStartAtLessThanAndEndAtGreaterThan(UUID doctorId, DayOfWeek dayOfWeek, LocalTime endAt, LocalTime startAt);

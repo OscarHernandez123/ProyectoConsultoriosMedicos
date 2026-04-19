@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import unimagdalena.edu.rcmu.dtos.ReportDtos.DoctorProductivityResponse;
+import unimagdalena.edu.rcmu.dtos.ReportDtos.NoShowPatientResponse;
+import unimagdalena.edu.rcmu.dtos.ReportDtos.OfficeOccupancyResponse;
 import unimagdalena.edu.rcmu.entities.Appointment;
 import unimagdalena.edu.rcmu.enums.AppointmentStatus;
 
@@ -57,18 +60,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID>{
             @Param("newStart") Instant newStart,
             @Param("newEnd") Instant newEnd
         );
-    @Query("""
-            SELECT a.office.id,
-                   SUM(a.appointmentType.durationMinutes)
-            FROM Appointment a
-            WHERE a.status = 'SCHEDULED' AND
-            a.startAt BETWEEN :startDate AND :endDate            
-            GROUP BY a.office.id
-            """)
-    List<Object[]> getOfficeOccupation(
-        @Param("startDate") Instant startDate,
-        @Param("endDate") Instant endDate
-    );
 
     @Query("""
             SELECT COUNT(a)
@@ -77,29 +68,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID>{
             AND (a.status = 'NO_SHOW' OR a.status = 'CANCELLED')
             """)
     Long countCancelledOrNoShowAppointmentBySpecialty(@Param("specialtyId") UUID specialtyId);
-
-    @Query("""
-            SELECT a.doctor.id,
-                   a.doctor.fullName,
-                   COUNT(a)
-            FROM Appointment a
-            WHERE a.status = 'COMPLETED'
-            GROUP BY a.doctor.id, a.doctor.fullName
-            ORDER BY COUNT(a) DESC
-            """)
-    List<Object[]> getDoctorByAppointmentsCompleteDesc();
                                         
-    @Query("""
-            SELECT a.patient.id,
-                   a.patient.fullName,
-                   COUNT(a)
-            FROM Appointment a
-            WHERE a.status = 'NO_SHOW'
-            GROUP BY a.patient.id, a.patient.fullName
-            ORDER BY COUNT(a) DESC
-            """)
-    List<Object[]> getPatientbyAppointmentsNoShowDesc();
-
    @Query("""
             SELECT COUNT(a)
             FROM Appointment a
@@ -127,4 +96,45 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID>{
         @Param("dayStart") Instant dayStart,
         @Param("dayEnd")Instant dayEnd
    );
+
+   @Query("""
+            SELECT new unimagdalena.edu.rcmu.dtos.ReportDtos$OfficeOccupancyResponse(
+                   a.office.id,
+                   SUM(a.appointmentType.durationMinutes)
+            )
+            FROM Appointment a
+            WHERE a.status = 'SCHEDULED'
+              AND a.startAt BETWEEN :startDate AND :endDate
+            GROUP BY a.office.id
+            """)
+    List<OfficeOccupancyResponse> getOfficeOccupation(
+        @Param("startDate") Instant startDate,
+        @Param("endDate") Instant endDate
+    );
+
+    @Query("""
+            SELECT new unimagdalena.edu.rcmu.dtos.ReportDtos$DoctorProductivityResponse(
+                   a.doctor.id,
+                   a.doctor.fullName,
+                   COUNT(a)
+            )
+            FROM Appointment a
+            WHERE a.status = 'COMPLETED'
+            GROUP BY a.doctor.id, a.doctor.fullName
+            ORDER BY COUNT(a) DESC
+            """)
+    List<DoctorProductivityResponse> getDoctorByAppointmentsCompleteDesc();
+
+    @Query("""
+            SELECT new unimagdalena.edu.rcmu.dtos.ReportDtos$NoShowPatientResponse(
+                   a.patient.id,
+                   a.patient.fullName,
+                   COUNT(a)
+            )
+            FROM Appointment a
+            WHERE a.status = 'NO_SHOW'
+            GROUP BY a.patient.id, a.patient.fullName
+            ORDER BY COUNT(a) DESC
+            """)
+    List<NoShowPatientResponse> getPatientbyAppointmentsNoShowDesc();
 }

@@ -1,14 +1,16 @@
 package unimagdalena.edu.rcmu.services.servicesImpls;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import unimagdalena.edu.rcmu.dtos.DoctorDtos.DoctorCreateRequest;
+import unimagdalena.edu.rcmu.dtos.DoctorDtos.DoctorPatchRequest;
 import unimagdalena.edu.rcmu.dtos.DoctorDtos.DoctorResponse;
 import unimagdalena.edu.rcmu.dtos.DoctorDtos.DoctorUpdateRequest;
 import unimagdalena.edu.rcmu.entities.Doctor;
@@ -46,7 +48,7 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public DoctorResponse patch(DoctorUpdateRequest request, UUID doctorId, UUID specialtyId) {
+    public DoctorResponse patch(DoctorPatchRequest request, UUID doctorId) {
 
         Specialty specialty = specialtyRepository.findById(request.specialtyId())
                 .orElseThrow(() -> new NotFoundException("Specialty not found"));
@@ -55,6 +57,23 @@ public class DoctorServiceImpl implements DoctorService {
                 .orElseThrow(() -> new NotFoundException("Doctor not found"));
 
         DoctorMapper.patch(doctor, request, specialty);
+
+        doctor.setUpdatedAt(Instant.now());
+        Doctor savedDoctor = doctorRepository.save(doctor);
+
+        return DoctorMapper.toResponse(savedDoctor);
+    }
+
+    @Override
+    public DoctorResponse update(DoctorUpdateRequest request, UUID doctorId){
+
+        Specialty specialty = specialtyRepository.findById(request.specialtyId())
+                .orElseThrow(() -> new NotFoundException("Specialty not found"));
+
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new NotFoundException("Doctor not found"));
+
+        DoctorMapper.update(doctor, request, specialty);
 
         doctor.setUpdatedAt(Instant.now());
         Doctor savedDoctor = doctorRepository.save(doctor);
@@ -72,11 +91,7 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public List<DoctorResponse> listAll() {
-
-        return doctorRepository.findAll()
-                .stream()
-                .map(DoctorMapper::toResponse)
-                .toList();
+    public Page<DoctorResponse> list(Pageable pageable) {
+        return doctorRepository.findAll(pageable).map(DoctorMapper::toResponse);
     }
 }

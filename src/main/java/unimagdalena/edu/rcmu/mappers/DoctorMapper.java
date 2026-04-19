@@ -1,6 +1,7 @@
 package unimagdalena.edu.rcmu.mappers;
 
 import unimagdalena.edu.rcmu.dtos.DoctorDtos.DoctorCreateRequest;
+import unimagdalena.edu.rcmu.dtos.DoctorDtos.DoctorPatchRequest;
 import unimagdalena.edu.rcmu.dtos.DoctorDtos.DoctorResponse;
 import unimagdalena.edu.rcmu.dtos.DoctorDtos.DoctorUpdateRequest;
 import unimagdalena.edu.rcmu.entities.Doctor;
@@ -24,7 +25,7 @@ public class DoctorMapper {
                 .build();
     }
     
-    public static void patch(Doctor doctor, DoctorUpdateRequest request, Specialty specialty){
+    public static void patch(Doctor doctor, DoctorPatchRequest request, Specialty specialty){
 
         if(request.fullName() != null){
             doctor.setFullName(request.fullName());
@@ -47,6 +48,13 @@ public class DoctorMapper {
                 DoctorProfileMapper.patch(doctor.getDoctorProfile(), request.profile());
             }
         }
+    }
+
+    public static void update(Doctor doctor, DoctorUpdateRequest request, Specialty specialty){
+        doctor.setFullName(request.fullName());
+        doctor.setEmail(request.email());
+        doctor.setSpecialty(specialty);
+        DoctorProfileMapper.patch(doctor.getDoctorProfile(), request.profile());
     }
 
     public static DoctorResponse toResponse(Doctor doctor){

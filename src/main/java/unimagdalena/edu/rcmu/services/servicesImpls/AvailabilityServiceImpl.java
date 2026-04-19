@@ -30,7 +30,7 @@ public class AvailabilityServiceImpl implements AvailabilityService{
     private final AppointmentRepository appointmentRepository;
     
     @Override
-public List<AvailabilitySlotResponse> getAvailableSlots(UUID doctorId, LocalDate date) {
+    public List<AvailabilitySlotResponse> getAvailableSlots(UUID doctorId, LocalDate date) {
     
         DoctorSchedule schedule = doctorScheduleRepository
                 .findByDoctorIdAndDayOfWeek(doctorId, date.getDayOfWeek())

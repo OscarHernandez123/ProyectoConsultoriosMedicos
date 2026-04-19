@@ -7,6 +7,8 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -224,5 +226,17 @@ public class AppointmentServiceImpl implements AppointmentService{
         Appointment savedAppointment = appointmentRepository.save(appointment);
 
         return AppointmentMapper.toResponse(savedAppointment);
+    }
+
+    public AppointmentResponse get(UUID appointmentId){
+
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new NotFoundException("Appointment not found"));
+
+        return AppointmentMapper.toResponse(appointment);
+    }
+
+    public Page<AppointmentResponse> list(Pageable pageable){
+        return appointmentRepository.findAll(pageable).map(AppointmentMapper::toResponse);
     }
 }

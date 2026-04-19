@@ -1,6 +1,7 @@
 package unimagdalena.edu.rcmu.mappers;
 
 import unimagdalena.edu.rcmu.dtos.OfficeDtos.OfficeCreateRequest;
+import unimagdalena.edu.rcmu.dtos.OfficeDtos.OfficePatchRequest;
 import unimagdalena.edu.rcmu.dtos.OfficeDtos.OfficeResponse;
 import unimagdalena.edu.rcmu.dtos.OfficeDtos.OfficeUpdateRequest;
 import unimagdalena.edu.rcmu.entities.Office;
@@ -15,7 +16,7 @@ public class OfficeMapper {
                 .build();
     }
 
-    public static void patch(Office office, OfficeUpdateRequest request){
+    public static void patch(Office office, OfficePatchRequest request){
 
         if(request.location() != null){
             office.setLocation(request.location());
@@ -24,6 +25,11 @@ public class OfficeMapper {
         if(request.status() != null){
             office.setStatus(request.status());
         }
+    }
+
+    public static void update(Office office, OfficeUpdateRequest request){
+        office.setLocation(request.location());
+        office.setStatus(request.status());
     }
 
     public static OfficeResponse toResponse(Office office){
