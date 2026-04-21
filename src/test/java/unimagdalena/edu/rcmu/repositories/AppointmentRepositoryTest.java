@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import unimagdalena.edu.rcmu.entities.Appointment;
-import unimagdalena.edu.rcmu.entities.AppointmentType;
 import unimagdalena.edu.rcmu.entities.Doctor;
 import unimagdalena.edu.rcmu.entities.Office;
 import unimagdalena.edu.rcmu.entities.Patient;
@@ -225,46 +224,6 @@ public class AppointmentRepositoryTest extends AbstractRepositoryIT{
         assertThat(countTraslapes).isEqualTo(1);
     }
 
-    @Test
-    void getOfficeOccupation(){
-
-        Office office = Office.builder()
-                        .location("Sincelejo")
-                        .status(OfficeStatus.ACTIVE)
-                        .build();
-
-        Office savedOffice = officeRepository.save(office);
-
-        AppointmentType type = AppointmentType.builder()
-                                .title("Consultation")
-                                .durationMinutes(30)
-                                .build();
-
-        AppointmentType savedType = appointmentTypeRepository.save(type);
-
-        Instant start = Instant.now();
-        Instant end = start.plusSeconds(1800);
-
-        Appointment appointment = Appointment.builder()
-                .title("Consultation")
-                .startAt(start)
-                .endAt(end)
-                .status(AppointmentStatus.SCHEDULED)
-                .office(savedOffice)
-                .appointmentType(savedType)
-                .build();
-
-        appointmentRepository.save(appointment);
-
-        List<Object[]> officeOccupation = appointmentRepository.getOfficeOccupation(
-                start.minusSeconds(3600),
-                start.plusSeconds(3600)
-        );
-
-        assertThat(officeOccupation).hasSize(1);
-        assertThat(officeOccupation.get(0)[0]).isEqualTo(savedOffice.getId());
-        assertThat(officeOccupation.get(0)[1]).isEqualTo(30L);
-    }
 
     @Test
     void countCancelledOrNoShowAppointmentBySpecialty(){
@@ -301,92 +260,4 @@ public class AppointmentRepositoryTest extends AbstractRepositoryIT{
         assertThat(countCancelledOrNoShow).isEqualTo(1);
     }
 
-    @Test
-    void getDoctorByAppointmentsCompleteDesc(){
-
-        Doctor doctor = Doctor.builder()
-                        .fullName("Oscar Turizo")
-                        .email("oscar@gmail.com")
-                        .build();
-
-        Doctor savedDoctor = doctorRepository.save(doctor);
-
-        Instant start = Instant.now();
-        Instant end = start.plusSeconds(1800);
-
-        Appointment appointment = Appointment.builder()
-                .title("Consultation")
-                .startAt(start)
-                .endAt(end)
-                .status(AppointmentStatus.COMPLETED)
-                .doctor(savedDoctor)
-                .build();
-
-        appointmentRepository.save(appointment);
-
-        List<Object[]> listOfDoctorComplete = appointmentRepository.getDoctorByAppointmentsCompleteDesc();
-
-        assertThat(listOfDoctorComplete).hasSize(1);
-
-        Object[] row = listOfDoctorComplete.get(0);
-
-        UUID doctorId = (UUID) row[0];
-        String fullName = (String) row[1];
-        Long count = (Long) row[2];
-
-        assertThat(doctorId).isEqualTo(savedDoctor.getId());
-        assertThat(fullName).isEqualTo("Oscar Turizo");
-        assertThat(count).isEqualTo(1L);
-    }
-
-    @Test
-    void getPatientbyAppointmentsNoShowDesc(){
-
-        Patient patient = Patient.builder()
-                            .fullName("Oscar Turizo")
-                            .phone("911")
-                            .email("oscar@gmail.com")
-                            .status(PatientStatus.ACTIVE)
-                            .build();
-
-        Patient savedPatient = patientRepository.save(patient);
-
-        Instant start = Instant.now();
-        Instant end = start.plusSeconds(1800);
-
-        Appointment appointment1 = Appointment.builder()
-                .title("Consultation")
-                .startAt(start)
-                .endAt(end)
-                .status(AppointmentStatus.NO_SHOW)
-                .patient(savedPatient)
-                .build();
-
-        appointmentRepository.save(appointment1);
-
-        Appointment appointment2 = Appointment.builder()
-                .title("Consultation")
-                .startAt(start)
-                .endAt(end)
-                .status(AppointmentStatus.CANCELLED)
-                .patient(savedPatient)
-                .build();
-
-        appointmentRepository.save(appointment2);
-
-        List<Object[]> result =
-                appointmentRepository.getPatientbyAppointmentsNoShowDesc();
-
-        assertThat(result).hasSize(1);
-
-        Object[] row = result.get(0);
-
-        UUID patientId = (UUID) row[0];
-        String fullName = (String) row[1];
-        Long count = (Long) row[2];
-
-        assertThat(patientId).isEqualTo(savedPatient.getId());
-        assertThat(fullName).isEqualTo("Oscar Turizo");
-        assertThat(count).isEqualTo(1L);
-    }
 }

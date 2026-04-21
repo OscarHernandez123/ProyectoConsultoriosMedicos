@@ -53,7 +53,7 @@ public class DoctorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DoctorResponse> update(@PathVariable UUID doctorId,
+    public ResponseEntity<DoctorResponse> update(@PathVariable("id") UUID doctorId,
                                                  @Valid @RequestBody DoctorUpdateRequest request){
         return ResponseEntity.ok(doctorService.update(request, doctorId));                                                
     }

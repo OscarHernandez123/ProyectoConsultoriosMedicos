@@ -76,8 +76,7 @@ class DoctorScheduleServiceImplTest {
         DoctorScheduleCreateRequest request = new DoctorScheduleCreateRequest(
                 DayOfWeek.MONDAY,
                 LocalTime.of(8, 0),
-                LocalTime.of(16, 0),
-                doctorId
+                LocalTime.of(16, 0)
         );
 
         when(doctorRepository.findById(doctorId)).thenReturn(Optional.of(doctor));
@@ -100,7 +99,7 @@ class DoctorScheduleServiceImplTest {
 
         when(doctorScheduleRepository.save(any(DoctorSchedule.class))).thenReturn(savedSchedule);
 
-        DoctorScheduleResponse response = doctorScheduleService.create(request);
+        DoctorScheduleResponse response = doctorScheduleService.create(request, doctorId);
 
         assertNotNull(response);
         assertEquals(DayOfWeek.MONDAY, response.dayOfWeek());
@@ -113,15 +112,14 @@ class DoctorScheduleServiceImplTest {
         DoctorScheduleCreateRequest request = new DoctorScheduleCreateRequest(
                 DayOfWeek.MONDAY,
                 LocalTime.of(8, 0),
-                LocalTime.of(16, 0),
-                doctorId
+                LocalTime.of(16, 0)
         );
 
         when(doctorRepository.findById(doctorId)).thenReturn(Optional.empty());
 
         NotFoundException ex = assertThrows(
                 NotFoundException.class,
-                () -> doctorScheduleService.create(request)
+                () -> doctorScheduleService.create(request, doctorId)
         );
 
         assertEquals("Doctor not found", ex.getMessage());
@@ -133,15 +131,14 @@ class DoctorScheduleServiceImplTest {
         DoctorScheduleCreateRequest request = new DoctorScheduleCreateRequest(
                 DayOfWeek.MONDAY,
                 LocalTime.of(16, 0),
-                LocalTime.of(8, 0),
-                doctorId
+                LocalTime.of(8, 0)
         );
 
         when(doctorRepository.findById(doctorId)).thenReturn(Optional.of(doctor));
 
         BadRequestException ex = assertThrows(
                 BadRequestException.class,
-                () -> doctorScheduleService.create(request)
+                () -> doctorScheduleService.create(request, doctorId)
         );
 
         assertEquals("Start time must be before end time", ex.getMessage());
@@ -153,15 +150,14 @@ class DoctorScheduleServiceImplTest {
         DoctorScheduleCreateRequest request = new DoctorScheduleCreateRequest(
                 DayOfWeek.MONDAY,
                 LocalTime.of(8, 0),
-                LocalTime.of(8, 0),
-                doctorId
+                LocalTime.of(8, 0)
         );
 
         when(doctorRepository.findById(doctorId)).thenReturn(Optional.of(doctor));
 
         BadRequestException ex = assertThrows(
                 BadRequestException.class,
-                () -> doctorScheduleService.create(request)
+                () -> doctorScheduleService.create(request, doctorId)
         );
 
         assertEquals("Start time must be before end time", ex.getMessage());
@@ -173,8 +169,7 @@ class DoctorScheduleServiceImplTest {
         DoctorScheduleCreateRequest request = new DoctorScheduleCreateRequest(
                 DayOfWeek.MONDAY,
                 LocalTime.of(9, 0),
-                LocalTime.of(12, 0),
-                doctorId
+                LocalTime.of(12, 0)
         );
 
         when(doctorRepository.findById(doctorId)).thenReturn(Optional.of(doctor));
@@ -189,7 +184,7 @@ class DoctorScheduleServiceImplTest {
 
         BadRequestException ex = assertThrows(
                 BadRequestException.class,
-                () -> doctorScheduleService.create(request)
+                () -> doctorScheduleService.create(request, doctorId)
         );
 
         assertEquals("Doctor schedule overlaps with an existing schedule", ex.getMessage());

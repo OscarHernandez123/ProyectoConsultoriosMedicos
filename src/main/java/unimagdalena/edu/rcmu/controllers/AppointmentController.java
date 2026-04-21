@@ -37,7 +37,7 @@ public class AppointmentController {
     public ResponseEntity<AppointmentResponse> create(@Valid @RequestBody AppointmentCreateRequest request,
                                                       UriComponentsBuilder uriBuilder){
         var appointmentCreated = appointmentService.create(request);
-        var location = uriBuilder.path("api/v1/appointments/{id}").buildAndExpand(appointmentCreated.id()).toUri();
+        var location = uriBuilder.path("/api/v1/appointments/{id}").buildAndExpand(appointmentCreated.id()).toUri();
         return ResponseEntity.created(location).body(appointmentCreated);
     }
 
